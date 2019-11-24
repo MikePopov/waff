@@ -87,11 +87,15 @@ class Controller {
     this.model = model;
     this.view = view;
 
-    this.onNotesListChanged(this.model.todos);
+    this.onNotesListChanged(this.model.notes);
   }
 
-  onTodoListChanged = todos => {
-    this.view.displayTodos(todos)
+  onNotesListChanged = notes => {
+    this.view.displayNotes(notes)
+  }
+
+  handleAddNote = noteText => {
+    this.model.addNote(noteText)
   }
 }
 
