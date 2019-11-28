@@ -1,18 +1,21 @@
 class Model {
   constructor() {
     this.notes = [
-      { title: 'First', text: 'Carrot', color: 'Blue'  },
-      { title: 'Second', text: 'Cucumber', color: 'Black'  }
+      { title: 'First', text: 'Carrot' },
+      { title: 'Second', text: 'Cucumber' }
     ]
   }
 
-  addNote(noteTitle, noteText, noteColor){
+  addNote(noteTitle, noteText){
     const note = {
       title: noteTitle,
       text: noteText,
-      color: noteColor
     };
     this.notes.push(note)
+  }
+
+  bindNotesListChanged(callback) {
+    this.onNotesListChanged = callback
   }
 
 }
@@ -25,6 +28,11 @@ class View {
 
     this.form = this.createElement('form');
 
+    this.noteTitle = this.createElement('input');
+    this.noteTitle.type = 'text';
+    this.noteTitle.placeholder = 'Title';
+    this.noteTitle.name = 'title';
+
     this.input = this.createElement('input');
     this.input.type = 'text';
     this.input.placeholder = 'Add note';
@@ -35,7 +43,7 @@ class View {
 
     this.notesList = this.createElement('ul', 'notes-list');
 
-    this.form.append(this.input, this.submitButton);
+    this.form.append(this.input, this.noteTitle, this.submitButton);
     this.app.append(this.title, this.form, this.notesList);
   }
 
@@ -56,9 +64,14 @@ class View {
     return this.input.value
   }
 
+  _notesTitle() {
+    return this.input.value
+  }
+
   _resetInput() {
     this.input.value = ''
   }
+
 
   displayNotes(notes) {
     if (notes.length === 0) {
@@ -79,6 +92,16 @@ class View {
     }
   }
 
+  bindAddNote(handler) {
+    this.form.addEventListener('submit', event => {
+      event.preventDefault()
+
+      if (this._notesText) {
+        handler(this._notesText)
+        this._resetInput()
+      }
+    })
+  }
 
 }
 
@@ -88,15 +111,19 @@ class Controller {
     this.view = view;
 
     this.onNotesListChanged(this.model.notes);
+    this.view.bindAddNote(this.handleAddNote);
+    this.model.bindNotesListChanged(this.onNotesListChanged())
   }
 
   onNotesListChanged = notes => {
     this.view.displayNotes(notes)
   }
 
-  handleAddNote = noteText => {
-    this.model.addNote(noteText)
+  handleAddNote = (noteText, noteTitle) => {
+    this.model.addNote(noteText, noteTitle)
   }
+
+
 }
 
 const app = new Controller(new Model(), new View())
